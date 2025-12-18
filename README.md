@@ -159,9 +159,9 @@ python main.py --mode debug --image ./data/MMU-Iris-Database/1/left/aleft.bmp
 | 🚧 | `wip` | 作業中 (Work in progress) |
 
 **記述例:**
-* `✨ feat: CLAHEによる前処理機能を追加`
-* `🐛 fix: ハミング距離計算時のゼロ除算エラーを修正`
-* `🧪 experiment: 閾値を20から25に変更して精度検証`
+* `✨ CLAHEによる前処理機能を追加`
+* `🐛 ハミング距離計算時のゼロ除算エラーを修正`
+* `🧪 閾値を20から25に変更して精度検証`
 
 ## 👤 著者 (Author)
 
