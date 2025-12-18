@@ -1,0 +1,17 @@
+# 仮想環境
+.venv/
+venv/
+ENV/
+
+# データセットディレクトリ
+data/
+
+*.bmp
+*.png
+*.jpg
+*.jpeg
+
+# Pythonのキャッシュや設定ファイル
+__pycache__/
+*.py[cod]
+.DS_Store
