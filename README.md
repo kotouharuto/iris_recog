@@ -165,8 +165,8 @@ python main.py --mode debug --image ./data/MMU-Iris-Database/1/left/aleft.bmp
 
 ## 👤 著者 (Author)
 
-* [あなたの名前]
-* 所属: [所属大学・組織名など]
+* 古藤 陽人
+* 所属: 東京工科大学 コンピュータサイエンス学部 人工知能専攻 バイオメトリクス研究室
 
 ## 📜 ライセンス (License)
 
