@@ -10,6 +10,12 @@ class IrisPreprocessor:
     def __init__(self):
         self.norm_height = config.NORM_HEIGHT
         self.norm_width = config.NORM_WIDTH
+        self.dp = config.HOUGH_DP
+        self.minDist = config.HOUGH_MIN_DIST
+        self.param1 = config.HOUGH_PARAM1
+        self.param2 = config.HOUGH_PARAM2
+        self.minRadius = config.HOUGH_MIN_RADIUS
+        self.maxRadius = config.HOUGH_MAX_RADIUS
 
     def preprocess(self, img):
         """
@@ -59,8 +65,8 @@ class IrisPreprocessor:
 
         # Fallback to Hough Circles for Pupil
         if best_pupil is None:
-            circles = cv2.HoughCircles(img_blur, cv2.HOUGH_GRADIENT, dp=1.0, minDist=100,
-                                       param1=50, param2=15, minRadius=10, maxRadius=50)
+            circles = cv2.HoughCircles(img_blur, cv2.HOUGH_GRADIENT, self.dp, self.minDist,
+                                       self.param1, self.param2, self.minRadius, self.maxRadius)
             if circles is not None:
                 circles = np.uint16(np.around(circles))
                 p = circles[0, 0]
