@@ -9,6 +9,14 @@ class IrisMatcher:
         """
         Calculate the lowest Hamming distance between two iris codes accounting for rotation shift.
         """
+        top_cut = 15
+        bottom_cut = 5
+
+        code1 = code1[top_cut:-bottom_cut, :]
+        code2 = code2[top_cut:-bottom_cut, :]
+        mask1 = mask1[top_cut:-bottom_cut, :]
+        mask2 = mask2[top_cut:-bottom_cut, :]
+
         if np.sum(mask1) == 0 or np.sum(mask2) == 0:
             return 1.0
 

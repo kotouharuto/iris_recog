@@ -132,6 +132,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Iris Recognition System")
     parser.add_argument("--data", type=str, default="./data/MMU-Iris-Database",
                         help="Path to the dataset directory")
+    parser.add_argument("data_dir", nargs="?", default=None,
+                        help="Optional positional path to dataset")
     args = parser.parse_args()
-    
-    main(args.data)
+
+    # Prefer positional argument when provided (keeps backward compatibility)
+    data_path = args.data_dir if args.data_dir is not None else args.data
+
+    main(data_path)

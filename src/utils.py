@@ -123,3 +123,43 @@ def plot_results(genuine_scores, impostor_scores, thresholds, fpr, tpr, eer, eer
     plt.legend(loc="lower right")
     plt.tight_layout()
     plt.show()
+
+
+def save_output_image(image, filename):
+    """
+    Saves the specified image to iris_recog/outputs/images with an absolute path.
+    """
+    # Save under repository root: <repo>/outputs/images
+    base_dir = Path(__file__).resolve().parents[1] / "outputs" / "images"
+
+    # Create directory if missing
+    if not base_dir.exists():
+        base_dir.mkdir(parents=True, exist_ok=True)
+        print(f"Directory created: {base_dir}")
+
+    save_path = base_dir / filename
+
+    # Prepare image for saving: ensure uint8 and proper scaling
+    img = image
+    if isinstance(img, np.ndarray):
+        if np.issubdtype(img.dtype, np.floating):
+            max_val = img.max() if img.size > 0 else 0
+            if max_val <= 1.0:
+                img = (img * 255.0)
+        img = np.clip(img, 0, 255).astype(np.uint8)
+    else:
+        try:
+            img = np.array(img)
+            if np.issubdtype(img.dtype, np.floating):
+                max_val = img.max() if img.size > 0 else 0
+                if max_val <= 1.0:
+                    img = (img * 255.0)
+            img = np.clip(img, 0, 255).astype(np.uint8)
+        except Exception:
+            raise ValueError("Unsupported image type for saving")
+
+    success = cv2.imwrite(str(save_path), img)
+    if success:
+        print(f"Saved: {save_path}")
+    else:
+        print(f"Failed to save image: {save_path}")
