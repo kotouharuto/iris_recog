@@ -13,12 +13,22 @@ from src.preprocessor import IrisPreprocessor
 from src.feature_extractor import IrisFeatureExtractor
 from src.matcher import IrisMatcher
 from src import utils, config
+from src.utils import save_output_image
 
 
 def main(data_dir):
     base_dir = Path(data_dir)
     img_exts = {'.bmp', '.png', '.jpg', '.jpeg'}
-    
+    # Check that provided data directory exists early and give actionable hint
+    if not base_dir.exists():
+        print(f"Data directory not found: {base_dir}")
+        alt = Path("./data")
+        if alt.exists():
+            print("Found './data' in the repository. Try: python main.py ./data")
+        else:
+            print("Please pass the dataset path, e.g. python main.py ./data")
+        return
+
     # Initialize components
     preprocessor = IrisPreprocessor()
     extractor = IrisFeatureExtractor()
@@ -37,8 +47,12 @@ def main(data_dir):
         if img is None:
             continue
 
+        subj_id = utils.get_subject_id(p)
+        file_base = f"{subj_id}_{p.stem}"
+
         # 1. Preprocess
         img_pre = preprocessor.preprocess(img)
+        save_output_image(img_pre, f"{file_base}_1_preprocessed.png")
 
         # 2. Detect
         pupil, iris = preprocessor.detect_iris_circles(img_pre)
