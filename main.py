@@ -13,11 +13,22 @@ from src.preprocessor import IrisPreprocessor
 from src.feature_extractor import IrisFeatureExtractor
 from src.matcher import IrisMatcher
 from src import utils, config
+from src.utils import save_output_image
 
 
 def main(data_dir):
     base_dir = Path(data_dir)
     img_exts = {'.bmp', '.png', '.jpg', '.jpeg'}
+
+    # Check that provided data directory exists early and give actionable hint
+    if not base_dir.exists():
+        print(f"Data directory not found: {base_dir}")
+        alt = Path("./data")
+        if alt.exists():
+            print("Found './data' in the repository. Try: python main.py ./data")
+        else:
+            print("Please pass the dataset path, e.g. python main.py ./data")
+        return
     
     # Initialize components
     preprocessor = IrisPreprocessor()
@@ -37,19 +48,30 @@ def main(data_dir):
         if img is None:
             continue
 
+        subj_id = utils.get_subject_id(p)
+        file_base = f"{subj_id}_{p.stem}"
+
         # 1. Preprocess
         img_pre = preprocessor.preprocess(img)
+        save_output_image(img_pre, f"{file_base}_1_preprocessed.png")
 
         # 2. Detect
         pupil, iris = preprocessor.detect_iris_circles(img_pre)
         if pupil is None or iris is None:
             continue
+        img_circles = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        cv2.circle(img_circles, (int(iris[0]), int(iris[1])), int(iris[2]), (0, 255, 0), 2) # 虹彩（緑）
+        cv2.circle(img_circles, (int(pupil[0]), int(pupil[1])), int(pupil[2]), (255, 0, 0), 2) # 瞳孔（赤）
+        save_output_image(img_circles, f"{file_base}_2_detection.png")
 
         # 3. Normalize
         norm_img = preprocessor.normalize_iris(img_pre, pupil, iris)
+        save_output_image(norm_img, f"{file_base}_3_normalized.png")
 
         # 4. Extract Features
         code_real, _, final_mask = extractor.extract_features(norm_img)
+        save_output_image(code_real * 255, f"{file_base}_4_code.png")
+        save_output_image(final_mask * 255, f"{file_base}_5_mask.png")
 
         # Add to DB
         subj_id = utils.get_subject_id(p)
@@ -61,6 +83,10 @@ def main(data_dir):
         })
 
     print(f"Successfully processed: {len(database)} / {len(image_paths)}")
+
+    if len(database) == 0:
+        print("No valid iris samples were processed. Exiting.")
+        return
 
     # Visualization (Debug)
     print("Visualizing random samples...")
@@ -94,8 +120,11 @@ def main(data_dir):
 
     print(f"Genuine pairs: {len(genuine_scores)}")
     print(f"Imposter pairs: {len(impostor_scores)}")
-
     # Evaluation
+    if len(genuine_scores) == 0 or len(impostor_scores) == 0:
+        print("Not enough pairs to compute ROC (need both genuine and impostor pairs). Exiting.")
+        return
+
     labels = [1] * len(genuine_scores) + [0] * len(impostor_scores)
     scores = np.concatenate([genuine_scores, impostor_scores])
 
@@ -118,6 +147,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Iris Recognition System")
     parser.add_argument("--data", type=str, default="./data/MMU-Iris-Database",
                         help="Path to the dataset directory")
+    parser.add_argument("data_dir", nargs="?", default=None,
+                        help="Optional positional path to dataset")
     args = parser.parse_args()
-    
-    main(args.data)
+
+    # Prefer positional argument when provided (keeps backward compatibility)
+    data_path = args.data_dir if args.data_dir is not None else args.data
+
+    main(data_path)
